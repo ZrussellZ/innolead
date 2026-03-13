@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getCSVFilePath, csvFileExists } from '@/lib/csv-utils'
 import { getRun } from '@/lib/runs'
+import { requireAuth } from '@/lib/auth'
 import fs from 'fs'
 
 export async function GET(request: NextRequest) {
   try {
+    const authError = requireAuth(request)
+    if (authError) return authError
+
     const { searchParams } = new URL(request.url)
     const runId = searchParams.get('runId')
 

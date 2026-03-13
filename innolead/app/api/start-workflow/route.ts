@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { v4 as uuidv4 } from 'uuid'
 import { createRun } from '@/lib/runs'
+import { requireAuth } from '@/lib/auth'
 
 export async function POST(request: NextRequest) {
   try {
+    const authError = requireAuth(request)
+    if (authError) return authError
+
     const { keyword } = await request.json()
 
     if (!keyword || typeof keyword !== 'string' || !keyword.trim()) {
