@@ -1,0 +1,81 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+@layer base {
+  body {
+    @apply bg-white text-text font-sans antialiased;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center px-6 py-3 bg-brand text-white font-semibold rounded-lg
+           hover:bg-brand-hover transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center px-6 py-3 border-2 border-brand text-brand font-semibold rounded-lg
+           hover:bg-brand-light transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2;
+  }
+
+  .card {
+    @apply bg-white rounded-xl shadow-sm border border-surface-border p-6;
+  }
+
+  .input-field {
+    @apply w-full px-4 py-3 border border-surface-border rounded-lg text-text
+           placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand
+           transition-all duration-200;
+  }
+
+  .tab-button {
+    @apply px-4 py-2.5 text-sm font-medium rounded-lg transition-colors duration-200;
+  }
+
+  .tab-button-active {
+    @apply bg-brand text-white;
+  }
+
+  .tab-button-inactive {
+    @apply text-text-secondary hover:bg-surface-alt hover:text-text;
+  }
+
+  .score-badge {
+    @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold;
+  }
+
+  .score-high {
+    @apply bg-green-100 text-green-800;
+  }
+
+  .score-mid {
+    @apply bg-yellow-100 text-yellow-800;
+  }
+
+  .score-low {
+    @apply bg-red-100 text-red-800;
+  }
+
+  .status-badge {
+    @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold;
+  }
+
+  .status-active {
+    @apply bg-green-100 text-green-700;
+  }
+
+  .status-inactive {
+    @apply bg-gray-100 text-gray-600;
+  }
+
+  .status-running {
+    @apply bg-blue-100 text-blue-700;
+  }
+
+  .status-failed {
+    @apply bg-red-100 text-red-700;
+  }
+}
