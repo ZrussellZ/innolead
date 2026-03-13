@@ -7,8 +7,8 @@ export async function POST(request: NextRequest) {
 
     if (!correctPassword) {
       return NextResponse.json(
-        { error: 'Server misconfigured: no password set' },
-        { status: 500 }
+        { error: 'Wachtwoord nog niet ingesteld. Neem contact op met de beheerder.' },
+        { status: 503 }
       )
     }
 

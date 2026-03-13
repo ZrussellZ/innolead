@@ -1,33 +1,43 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
 
 export function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl
+  try {
+    const pathname = request.nextUrl.pathname
 
-  if (
-    pathname === '/login' ||
-    pathname.startsWith('/api/auth') ||
-    pathname.startsWith('/api/results/callback') ||
-    pathname.startsWith('/_next') ||
-    pathname.startsWith('/favicon') ||
-    pathname === '/logo.png'
-  ) {
+    const publicPaths = [
+      '/login',
+      '/api/auth',
+      '/api/results/callback',
+      '/logo.png',
+      '/favicon.ico',
+    ]
+
+    const isPublic = publicPaths.some((p) => pathname === p || pathname.startsWith(p + '/'))
+    if (isPublic) {
+      return NextResponse.next()
+    }
+
+    const authCookie = request.cookies.get('innolead_auth')
+    if (authCookie?.value === 'authenticated') {
+      return NextResponse.next()
+    }
+
+    if (pathname.startsWith('/api/')) {
+      return new NextResponse(JSON.stringify({ error: 'Niet geautoriseerd' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' },
+      })
+    }
+
+    return NextResponse.redirect(new URL('/login', request.url))
+  } catch {
     return NextResponse.next()
   }
-
-  const authCookie = request.cookies.get('innolead_auth')
-  if (authCookie?.value === 'authenticated') {
-    return NextResponse.next()
-  }
-
-  if (pathname.startsWith('/api/')) {
-    return NextResponse.json({ error: 'Niet geautoriseerd' }, { status: 401 })
-  }
-
-  const url = request.nextUrl.clone()
-  url.pathname = '/login'
-  return NextResponse.redirect(url)
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|logo.png).*)'],
+  matcher: [
+    '/((?!_next|favicon.ico|logo.png).*)',
+  ],
 }
