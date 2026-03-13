@@ -6,8 +6,12 @@ import type { Lead } from './types'
 const DATA_DIR = path.join(process.cwd(), 'data')
 
 function ensureDataDir() {
-  if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true })
+  try {
+    if (!fs.existsSync(DATA_DIR)) {
+      fs.mkdirSync(DATA_DIR, { recursive: true })
+    }
+  } catch {
+    // Read-only filesystem (e.g. Vercel)
   }
 }
 
@@ -30,16 +34,24 @@ export function readRunCSV(runId: string): Lead[] {
 }
 
 export function writeRunCSV(runId: string, leads: Lead[]): void {
-  ensureDataDir()
-  const csv = Papa.unparse(leads)
-  const filePath = path.join(DATA_DIR, `${runId}.csv`)
-  fs.writeFileSync(filePath, csv, 'utf-8')
+  try {
+    ensureDataDir()
+    const csv = Papa.unparse(leads)
+    const filePath = path.join(DATA_DIR, `${runId}.csv`)
+    fs.writeFileSync(filePath, csv, 'utf-8')
+  } catch {
+    console.warn('Could not write CSV (read-only filesystem)')
+  }
 }
 
 export function writeRawCSV(runId: string, csvContent: string): void {
-  ensureDataDir()
-  const filePath = path.join(DATA_DIR, `${runId}.csv`)
-  fs.writeFileSync(filePath, csvContent, 'utf-8')
+  try {
+    ensureDataDir()
+    const filePath = path.join(DATA_DIR, `${runId}.csv`)
+    fs.writeFileSync(filePath, csvContent, 'utf-8')
+  } catch {
+    console.warn('Could not write CSV (read-only filesystem)')
+  }
 }
 
 export function getCSVFilePath(runId: string): string {

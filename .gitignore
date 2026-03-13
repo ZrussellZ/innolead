@@ -32,9 +32,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# runtime data
-/data/*.csv
-/data/runs.json
+# runtime data (written by callbacks - not applicable on Vercel)
+# /data/*.csv
+# /data/runs.json
 
 # old subdirectory (project now at root)
 /innolead/

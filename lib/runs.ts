@@ -6,8 +6,12 @@ const DATA_DIR = path.join(process.cwd(), 'data')
 const RUNS_FILE = path.join(DATA_DIR, 'runs.json')
 
 function ensureDataDir() {
-  if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true })
+  try {
+    if (!fs.existsSync(DATA_DIR)) {
+      fs.mkdirSync(DATA_DIR, { recursive: true })
+    }
+  } catch {
+    // Read-only filesystem (e.g. Vercel)
   }
 }
 
@@ -44,6 +48,10 @@ export function updateRun(id: string, updates: Partial<Run>): void {
 }
 
 function saveRuns(runs: Run[]): void {
-  ensureDataDir()
-  fs.writeFileSync(RUNS_FILE, JSON.stringify(runs, null, 2), 'utf-8')
+  try {
+    ensureDataDir()
+    fs.writeFileSync(RUNS_FILE, JSON.stringify(runs, null, 2), 'utf-8')
+  } catch {
+    console.warn('Could not save runs (read-only filesystem)')
+  }
 }
