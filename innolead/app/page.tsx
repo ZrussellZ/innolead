@@ -7,9 +7,9 @@ export default function HomePage() {
       <section className="bg-gradient-to-br from-white via-brand-light to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32">
           <div className="text-center">
-            <h1 className="text-4xl md:text-6xl font-extrabold text-text mb-4">
-              Inno<span className="text-brand">Lead</span>
-            </h1>
+            <div className="flex justify-center mb-6">
+              <img src="/logo.png" alt="InnoLead" className="h-24 md:h-28" />
+            </div>
             <p className="text-xl md:text-2xl text-text-secondary mb-2">
               Lead Generatie Automatisering
             </p>

@@ -12,19 +12,10 @@ function ensureDataDir() {
 }
 
 export function parseCSVString(csvContent: string): Lead[] {
-  const headerCount: Record<string, number> = {}
   const result = Papa.parse<Lead>(csvContent, {
     header: true,
     skipEmptyLines: true,
     dynamicTyping: false,
-    transformHeader: (header: string) => {
-      if (headerCount[header] !== undefined) {
-        headerCount[header]++
-        return `${header}_${headerCount[header]}`
-      }
-      headerCount[header] = 0
-      return header
-    },
   })
   return result.data
 }

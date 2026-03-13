@@ -15,11 +15,8 @@ export default function Header() {
     <header className="bg-white border-b border-surface-border sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          <Link href="/" className="flex items-center gap-3">
-            <img src="/logo.png" alt="InnoLead" className="h-9" />
-            <span className="text-xl font-bold text-text">
-              Inno<span className="text-brand">Lead</span>
-            </span>
+          <Link href="/">
+            <img src="/logo.png" alt="InnoLead" className="h-14" />
           </Link>
 
           <nav className="flex items-center gap-1">

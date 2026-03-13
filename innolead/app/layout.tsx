@@ -5,7 +5,7 @@ import Footer from '@/components/Footer'
 import PasswordGate from '@/components/PasswordGate'
 
 export const metadata: Metadata = {
-  title: 'InnoLead - Lead Generatie Automatisering',
+  title: 'Lead Generatie Automatisering',
   description: 'Automatische lead generatie voor Innostock. Vind de beste e-commerce prospects in Europa.',
   icons: { icon: '/logo.png' },
 }

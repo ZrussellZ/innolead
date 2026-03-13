@@ -5,10 +5,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
             <div className="flex items-center gap-3 mb-4">
-              <img src="/logo.png" alt="InnoLead" className="h-8 brightness-0 invert" />
-              <span className="text-lg font-bold">
-                Inno<span className="text-brand">Lead</span>
-              </span>
+              <img src="/logo.png" alt="InnoLead" className="h-12 brightness-0 invert" />
             </div>
             <p className="text-gray-400 text-sm">
               Lead generatie automatisering voor Innostock.

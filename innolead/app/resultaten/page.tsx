@@ -1,9 +1,8 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import type { Run, Lead } from '@/lib/types'
+import type { Run } from '@/lib/types'
 import CompanyTable from '@/components/CompanyTable'
-import CompanyDetail from '@/components/CompanyDetail'
 
 export default function ResultatenPage() {
   const [runs, setRuns] = useState<Run[]>([])
@@ -179,13 +178,6 @@ export default function ResultatenPage() {
             onSelectCompany={setSelectedCompanyIndex}
             selectedIndex={selectedCompanyIndex}
           />
-
-          {selectedCompanyIndex !== null && leads[selectedCompanyIndex] && (
-            <CompanyDetail
-              lead={leads[selectedCompanyIndex]}
-              onClose={() => setSelectedCompanyIndex(null)}
-            />
-          )}
         </div>
       )}
     </div>

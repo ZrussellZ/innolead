@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { Fragment, useState, useMemo } from 'react'
 import type { Lead } from '@/lib/types'
+import CompanyDetail from './CompanyDetail'
 
 type SortField = 'Company name' | 'Score %' | 'Website URL' | 'Date'
 type SortDirection = 'asc' | 'desc'
@@ -19,7 +20,7 @@ export default function CompanyTable({
   selectedIndex,
 }: {
   leads: Lead[]
-  onSelectCompany: (index: number) => void
+  onSelectCompany: (index: number | null) => void
   selectedIndex: number | null
 }) {
   const [sortField, setSortField] = useState<SortField>('Score %')
@@ -103,7 +104,7 @@ export default function CompanyTable({
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto rounded-xl border border-surface-border">
+      <div className="rounded-xl border border-surface-border overflow-hidden">
         <table className="w-full">
           <thead>
             <tr className="bg-surface-alt">
@@ -127,34 +128,65 @@ export default function CompanyTable({
             </tr>
           </thead>
           <tbody>
-            {filteredAndSorted.map(({ lead, originalIndex }) => (
-              <tr
-                key={originalIndex}
-                onClick={() => onSelectCompany(originalIndex)}
-                className={`border-t border-surface-border cursor-pointer transition-colors ${
-                  selectedIndex === originalIndex
-                    ? 'bg-brand-light'
-                    : 'hover:bg-surface-alt'
-                }`}
-              >
-                <td className="px-4 py-3">
-                  <span className="font-medium text-text">{lead['Company name']}</span>
-                </td>
-                <td className="px-4 py-3">
-                  <span className="text-sm text-text-secondary truncate block max-w-xs">
-                    {lead['Website URL']}
-                  </span>
-                </td>
-                <td className="px-4 py-3">
-                  <ScoreBadge score={lead['Score %']} />
-                </td>
-                <td className="px-4 py-3">
-                  <span className="text-sm text-text-secondary">
-                    {lead['Date']?.split(' ')[0] || '-'}
-                  </span>
-                </td>
-              </tr>
-            ))}
+            {filteredAndSorted.map(({ lead, originalIndex }) => {
+              const isSelected = selectedIndex === originalIndex
+              return (
+                <Fragment key={originalIndex}>
+                  {/* Company row */}
+                  <tr
+                    onClick={() => onSelectCompany(isSelected ? null : originalIndex)}
+                    className={`border-t border-surface-border cursor-pointer transition-colors ${
+                      isSelected
+                        ? 'bg-brand-light border-brand'
+                        : 'hover:bg-surface-alt'
+                    }`}
+                  >
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          strokeWidth={2}
+                          stroke="currentColor"
+                          className={`w-4 h-4 flex-shrink-0 transition-transform ${isSelected ? 'rotate-90 text-brand' : 'text-text-muted'}`}
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                        </svg>
+                        <span className="font-medium text-text">{lead['Company name']}</span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className="text-sm text-text-secondary truncate block max-w-xs">
+                        {lead['Website URL']}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <ScoreBadge score={lead['Score %']} />
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className="text-sm text-text-secondary">
+                        {lead['Date']?.split(' ')[0] || '-'}
+                      </span>
+                    </td>
+                  </tr>
+
+                  {/* Inline detail row — only shown for selected company */}
+                  {isSelected && (
+                    <tr className="border-t border-brand">
+                      <td colSpan={4} className="p-0 bg-white">
+                        <div className="p-4">
+                          <CompanyDetail
+                            lead={lead}
+                            onClose={() => onSelectCompany(null)}
+                          />
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </Fragment>
+              )
+            })}
             {filteredAndSorted.length === 0 && (
               <tr>
                 <td colSpan={4} className="px-4 py-12 text-center text-text-secondary">
