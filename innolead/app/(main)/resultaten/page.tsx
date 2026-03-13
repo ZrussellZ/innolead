@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import type { Run } from '@/lib/types'
+import type { Run, Lead } from '@/lib/types'
 import CompanyTable from '@/components/CompanyTable'
 
 export default function ResultatenPage() {

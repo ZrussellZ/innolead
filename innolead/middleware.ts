@@ -4,6 +4,7 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   if (
+    pathname === '/login' ||
     pathname.startsWith('/api/auth') ||
     pathname.startsWith('/api/results/callback') ||
     pathname.startsWith('/_next') ||
@@ -23,9 +24,8 @@ export function middleware(request: NextRequest) {
   }
 
   const url = request.nextUrl.clone()
-  url.searchParams.set('locked', '1')
-  const response = NextResponse.rewrite(url)
-  return response
+  url.pathname = '/login'
+  return NextResponse.redirect(url)
 }
 
 export const config = {
