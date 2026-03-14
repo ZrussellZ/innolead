@@ -2,40 +2,91 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { supabase } from '@/lib/supabase'
+
+const MAX_KEYWORDS = 3
 
 export default function StartWorkflow() {
-  const [keyword, setKeyword] = useState('')
+  const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
-  const [status, setStatus] = useState<'idle' | 'started' | 'error'>('idle')
+  const [status, setStatus] = useState<'idle' | 'started' | 'duplicate' | 'error'>('idle')
   const [message, setMessage] = useState('')
   const router = useRouter()
 
+  function parseKeywords(raw: string): string[] {
+    return raw
+      .split(',')
+      .map((k) => k.trim())
+      .filter(Boolean)
+  }
+
   async function handleStart(e: React.FormEvent) {
     e.preventDefault()
-    if (!keyword.trim()) return
+
+    const keywords = parseKeywords(input)
+    if (keywords.length === 0) return
+
+    if (keywords.length > MAX_KEYWORDS) {
+      setStatus('error')
+      setMessage(`Je kunt maximaal ${MAX_KEYWORDS} keywords tegelijk gebruiken`)
+      return
+    }
 
     setLoading(true)
     setStatus('idle')
     setMessage('')
 
     try {
-      const res = await fetch('/api/start-workflow', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ keyword: keyword.trim() }),
-      })
+      const { data: existingLeads } = await supabase
+        .from('leads')
+        .select('keyword')
 
-      const data = await res.json()
+      const existingKeywords = new Set(
+        (existingLeads ?? []).map((r) => r.keyword?.toLowerCase()),
+      )
 
-      if (res.ok) {
+      const duplicates = keywords.filter((k) =>
+        existingKeywords.has(k.toLowerCase()),
+      )
+
+      if (duplicates.length > 0) {
+        setStatus('duplicate')
+        const dupList = duplicates.map((k) => `"${k}"`).join(', ')
+        setMessage(
+          duplicates.length === 1
+            ? `Het keyword ${dupList} is al eerder gebruikt`
+            : `De keywords ${dupList} zijn al eerder gebruikt`,
+        )
+        setLoading(false)
+        return
+      }
+
+      const results = await Promise.all(
+        keywords.map((keyword) =>
+          fetch('/api/start-workflow', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ keyword }),
+          }).then(async (res) => {
+            const data = await res.json()
+            return { ok: res.ok, data, keyword }
+          }),
+        ),
+      )
+
+      const failed = results.filter((r) => !r.ok)
+      if (failed.length === 0) {
         setStatus('started')
-        setMessage(`Automatisering gestart voor "${keyword.trim()}"`)
-        setTimeout(() => {
-          router.push('/resultaten')
-        }, 2000)
+        const keywordList = keywords.map((k) => `"${k}"`).join(', ')
+        setMessage(
+          keywords.length === 1
+            ? `Automatisering gestart voor ${keywordList}`
+            : `${keywords.length} automatiseringen gestart voor ${keywordList}`,
+        )
+        setTimeout(() => router.push('/resultaten'), 2000)
       } else {
         setStatus('error')
-        setMessage(data.error || 'Er is een fout opgetreden')
+        setMessage(failed[0].data.error || 'Er is een fout opgetreden')
       }
     } catch {
       setStatus('error')
@@ -45,23 +96,32 @@ export default function StartWorkflow() {
     }
   }
 
+  const keywords = parseKeywords(input)
+  const tooMany = keywords.length > MAX_KEYWORDS
+
   return (
     <div className="w-full max-w-2xl mx-auto">
       <form onSubmit={handleStart} className="space-y-4">
         <div className="relative">
           <input
             type="text"
-            value={keyword}
-            onChange={(e) => setKeyword(e.target.value)}
-            placeholder="Keyword"
-            className="input-field text-lg py-4 pr-4"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Keyword(s)"
+            className="input-field text-lg py-4 pr-4 text-center"
             disabled={loading}
           />
         </div>
 
+        {tooMany && (
+          <p className="text-red-600 text-sm font-medium">
+            Maximaal {MAX_KEYWORDS} keywords tegelijk (je hebt er {keywords.length})
+          </p>
+        )}
+
         <button
           type="submit"
-          disabled={loading || !keyword.trim()}
+          disabled={loading || keywords.length === 0 || tooMany}
           className="btn-primary w-full text-lg py-4 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? (
@@ -83,6 +143,15 @@ export default function StartWorkflow() {
           <p className="font-medium">{message}</p>
           <p className="text-sm mt-1 text-green-600">
             Je wordt doorgestuurd naar de resultaten pagina...
+          </p>
+        </div>
+      )}
+
+      {status === 'duplicate' && (
+        <div className="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-center">
+          <p className="font-medium">{message}</p>
+          <p className="text-sm mt-1 text-amber-600">
+            Gebruik een ander keyword om een nieuwe automatisering te starten.
           </p>
         </div>
       )}

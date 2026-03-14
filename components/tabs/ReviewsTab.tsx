@@ -133,7 +133,7 @@ export default function ReviewsTab({ data }: { data: ReviewsData }) {
                 href={data.trustpilot.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sm text-brand hover:text-brand-hover transition-colors"
+                className="text-sm text-brand hover:text-brand-hover transition-colors truncate block"
               >
                 {data.trustpilot.url}
               </a>

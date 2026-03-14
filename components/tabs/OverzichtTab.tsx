@@ -42,7 +42,7 @@ function SocialLink({ url, label, icon }: { url: string; label: string; icon: Re
       title={label}
     >
       {icon}
-      <span className="text-text-secondary truncate max-w-[180px]">{label}</span>
+      <span className="text-text-secondary truncate max-w-[120px] sm:max-w-[180px]">{label}</span>
     </a>
   )
 }
@@ -60,13 +60,13 @@ export default function OverzichtTab({ data }: { data: OverzichtData }) {
         </div>
 
         <div className="flex-1 space-y-4">
-          <div>
-            <h3 className="text-2xl font-bold text-text">{data.companyName}</h3>
+          <div className="min-w-0">
+            <h3 className="text-xl sm:text-2xl font-bold text-text truncate">{data.companyName}</h3>
             <a
               href={data.websiteUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-brand hover:text-brand-hover transition-colors"
+              className="text-sm sm:text-base text-brand hover:text-brand-hover transition-colors truncate block"
             >
               {data.websiteUrl}
             </a>

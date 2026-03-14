@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { v4 as uuidv4 } from 'uuid'
-import { createRun } from '@/lib/runs'
 import { requireAuth } from '@/lib/auth'
 
 export async function POST(request: NextRequest) {
@@ -29,14 +28,7 @@ export async function POST(request: NextRequest) {
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
     const callbackUrl = `${appUrl}/api/results/callback`
 
-    createRun({
-      id: runId,
-      keyword: keyword.trim(),
-      date: new Date().toISOString(),
-      status: 'running',
-    })
-
-    fetch(webhookUrl, {
+    const webhookRes = await fetch(webhookUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -44,9 +36,15 @@ export async function POST(request: NextRequest) {
         runId,
         callbackUrl,
       }),
-    }).catch((err) => {
-      console.error('n8n webhook call failed:', err)
     })
+
+    if (!webhookRes.ok) {
+      console.error('n8n webhook returned', webhookRes.status, await webhookRes.text().catch(() => ''))
+      return NextResponse.json(
+        { error: 'Webhook kon niet worden bereikt' },
+        { status: 502 }
+      )
+    }
 
     return NextResponse.json({
       success: true,

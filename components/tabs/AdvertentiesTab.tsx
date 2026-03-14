@@ -13,19 +13,19 @@ function ActiveBadge({ value }: { value: string }) {
 
 function DataRow({ label, value, isLink }: { label: string; value: string; isLink?: boolean }) {
   return (
-    <div className="flex justify-between items-start py-2 border-b border-surface-border last:border-0">
-      <span className="text-sm text-text-secondary">{label}</span>
+    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start py-2 border-b border-surface-border last:border-0 gap-0.5 sm:gap-2">
+      <span className="text-xs sm:text-sm text-text-secondary flex-shrink-0">{label}</span>
       {isLink && value ? (
         <a
           href={value}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-sm text-brand hover:text-brand-hover transition-colors text-right max-w-[60%] truncate"
+          className="text-sm text-brand hover:text-brand-hover transition-colors sm:text-right truncate"
         >
           Link openen
         </a>
       ) : (
-        <span className="text-sm text-text font-medium text-right max-w-[60%]">
+        <span className="text-sm text-text font-medium sm:text-right break-words sm:max-w-[60%]">
           {value || '-'}
         </span>
       )}
