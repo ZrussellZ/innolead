@@ -11,15 +11,103 @@ interface KeywordGroup {
   latestDate: string
 }
 
+const SUPABASE_TO_LEAD: Record<string, string> = {
+  score_percentage: 'Score %',
+  score_points: 'Gehaald punten',
+  score_available: 'Mogelijke Punten',
+  score_reason: 'Uitleg score',
+  company_name: 'Company name',
+  website_url: 'Website URL',
+  date: 'Date',
+  created_at: '_created_at',
+  product_description: 'Wat voor producten ze verkopen',
+  sku_count: "Aantal SKU's",
+  smallest_product_name: 'Kleinste product naam',
+  smallest_product_url: 'Kleinste product URL',
+  smallest_product_dimensions: 'Kleinste product afmetingen ',
+  smallest_product_weight: 'Kleinste product gewicht',
+  biggest_product_name: 'Grootste product naam',
+  biggest_product_url: 'Grootste product URL',
+  biggest_product_dimensions: 'Grootste product afemtingen',
+  biggest_product_weight: 'Grootste product gewicht',
+  lightest_product_name: 'Lichtste product naam',
+  lightest_product_url: 'Lichtste product URL',
+  lightest_product_dimensions: 'Lichtste product afemtingen',
+  lightest_product_weight: 'Lichtste product gewicht',
+  heaviest_product_name: 'Zwaarste product naam',
+  heaviest_product_url: 'Zwaarste product URL',
+  heaviest_product_dimensions: 'Zwaarste product afmetingen',
+  heaviest_product_weight: 'Zwaarste product gewicht',
+  return_address: 'Retour adress',
+  cutoff_time: 'Cutoff tijd',
+  cutoff_note: 'Cutoff Note',
+  shipping_countries: 'Waar ze hun producten naartoe sturen',
+  instagram: 'Instagram',
+  facebook: 'Facebook',
+  youtube: 'Youtube',
+  tiktok: 'Tiktok',
+  x_twitter: 'X',
+  linkedin: 'Linked In',
+  status_product_info: 'Status Product/Bedrijfs Informatie',
+  google_rating: 'Google Rating',
+  google_total_reviews: 'Google Total Reviews',
+  google_review_1: 'Recent Review 1',
+  google_review_2: 'Recent Review 2',
+  google_review_3: 'Recent Review 3',
+  google_business_address: 'Google Business Adress',
+  google_place_id: 'Google Place ID',
+  status_google_reviews: 'Status Google Reviews',
+  trustpilot_rating: 'TrustPilot Rating',
+  trustpilot_total_reviews: 'TrustPilot Total Reviews',
+  trustpilot_review_1: 'TrustPilot Recent Review 1',
+  trustpilot_review_2: 'TrustPilot Recent Review 2',
+  trustpilot_review_3: 'TrustPilot Recent Review 3',
+  trustpilot_url: 'TrustPilot URL',
+  status_trustpilot: 'Status TrustPilot',
+  has_meta_ads: 'Has Meta Ads',
+  meta_active_ads_count: 'Meta active ads count',
+  meta_platforms: 'Meta Platforms',
+  meta_last_ad_run: 'Meta Last ad run',
+  meta_ads_last_30_days: 'Meta Ads runned last 30 days?',
+  meta_likes_count: 'Meta Likes count',
+  meta_library_url: 'Meta Libary URL',
+  meta_page_id: 'Meta Page ID',
+  google_has_ads: 'Google has ads',
+  google_page_id: 'Google Page ID',
+  google_latest_ad: 'Google Latest ad',
+  google_ads_last_30_days: 'Ads runned last 30 days?',
+  status: 'Status',
+  contact_1_first_name: 'Contact 1 First Name',
+  contact_1_last_name: 'Contact 1 Last Name',
+  contact_1_position: 'Contact 1 Position',
+  contact_1_linkedin: 'Contact 1 Linked-In',
+  contact_2_first_name: 'Contact 2 First Name',
+  contact_2_last_name: 'Contact 2 Last Name',
+  contact_2_position: 'Contact 2 Position',
+  contact_2_linkedin: 'Contact 2 Linked-In',
+  contact_3_first_name: 'Contact 3 First Name',
+  contact_3_last_name: 'Contact 3 Last Name',
+  contact_3_position: 'Contact 3 Position',
+  contact_3_linkedin: 'Contact 3 Linked-In',
+  contact_4_first_name: 'Contact 4 First Name',
+  contact_4_last_name: 'Contact 4 Last Name',
+  contact_4_position: 'Contact 4 Position',
+  contact_4_linkedin: 'Contact 4 Linked-In',
+  contact_5_first_name: 'Contact 5 First Name',
+  contact_5_last_name: 'Contact 5 Last Name',
+  contact_5_position: 'Contact 5 Position',
+  contact_5_linkedin: 'Contact 5 Linked-In',
+}
+
 function mapRow(row: Record<string, unknown>): Lead {
   const lead = {} as Lead
   for (const [key, value] of Object.entries(row)) {
-    lead[key] = value == null ? '' : String(value)
+    const mappedKey = SUPABASE_TO_LEAD[key] || key
+    lead[mappedKey] = value == null ? '' : String(value)
   }
-  if (!lead['Score %']) lead['Score %'] = lead['score_percentage'] || ''
-  if (!lead['Company name']) lead['Company name'] = lead['company_name'] || ''
-  if (!lead['Website URL']) lead['Website URL'] = lead['website_url'] || ''
-  if (!lead['Date']) lead['Date'] = lead['date'] || lead['created_at'] || ''
+  if (!lead['Date'] && lead['_created_at']) {
+    lead['Date'] = lead['_created_at']
+  }
   return lead
 }
 
