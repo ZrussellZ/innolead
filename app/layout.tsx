@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'Lead Generatie Automatisering',
+  title: 'Lead Generation',
   description: 'Automatische lead generatie voor Innostock. Vind de beste e-commerce prospects in Europa.',
   icons: { icon: '/logo.png' },
 }

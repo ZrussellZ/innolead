@@ -53,7 +53,7 @@ export default function StartWorkflow() {
             type="text"
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
-            placeholder="Voer een zoekwoord in (bijv. supplementen, skincare, CBD...)"
+            placeholder="Keyword"
             className="input-field text-lg py-4 pr-4"
             disabled={loading}
           />
