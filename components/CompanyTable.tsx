@@ -149,7 +149,7 @@ export default function CompanyTable({
           const isChecked = selectedForExport.has(originalIndex)
           return (
             <Fragment key={originalIndex}>
-              <div className="flex items-start gap-3">
+              <div className="flex items-start gap-3 w-full">
                 <label className="flex-shrink-0 mt-4 flex items-center cursor-pointer" onClick={(e) => e.stopPropagation()}>
                   <input
                     type="checkbox"
@@ -160,7 +160,7 @@ export default function CompanyTable({
                 </label>
                 <div
                   onClick={() => onSelectCompany(isSelected ? null : originalIndex)}
-                  className={`flex-1 rounded-xl border p-4 cursor-pointer transition-colors ${
+                  className={`flex-1 min-w-0 rounded-xl border p-4 cursor-pointer transition-colors ${
                     isSelected
                       ? 'bg-brand-light border-brand'
                       : isChecked
