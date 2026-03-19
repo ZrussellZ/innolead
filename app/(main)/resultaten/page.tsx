@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 import type { Lead } from '@/lib/types'
 import CompanyTable from '@/components/CompanyTable'
@@ -238,6 +238,7 @@ export default function ResultatenPage() {
   const [selectedForExport, setSelectedForExport] = useState<Set<number>>(new Set())
   const [loading, setLoading] = useState(true)
   const [loadingLeads, setLoadingLeads] = useState(false)
+  const selectedKeywordRef = useRef(selectedKeyword)
 
   const fetchKeywords = useCallback(async () => {
     const { data, error } = await supabase.from('leads').select('keyword, created_at')
@@ -252,8 +253,7 @@ export default function ResultatenPage() {
 
     const map = new Map<string, KeywordGroup>()
     for (const row of data) {
-      const kw = row.keyword
-      if (!kw) continue
+      const kw = row.keyword || 'Geen keyword'
       const dateStr = row.created_at || ''
       const existing = map.get(kw)
       if (existing) {
@@ -282,7 +282,11 @@ export default function ResultatenPage() {
     setSelectedForExport(new Set())
 
     let query = supabase.from('leads').select('*')
-    if (kw !== ALL_KEYWORD) {
+    if (kw === ALL_KEYWORD) {
+      // fetch all
+    } else if (kw === 'Geen keyword') {
+      query = query.is('keyword', null)
+    } else {
       query = query.eq('keyword', kw)
     }
 
@@ -292,8 +296,20 @@ export default function ResultatenPage() {
   }, [])
 
   useEffect(() => {
+    selectedKeywordRef.current = selectedKeyword
+  }, [selectedKeyword])
+
+  useEffect(() => {
     fetchKeywords()
-  }, [fetchKeywords])
+
+    const interval = setInterval(() => {
+      fetchKeywords()
+      const kw = selectedKeywordRef.current
+      if (kw) fetchLeads(kw)
+    }, 10_000)
+
+    return () => clearInterval(interval)
+  }, [fetchKeywords, fetchLeads])
 
   useEffect(() => {
     if (selectedKeyword) fetchLeads(selectedKeyword)
