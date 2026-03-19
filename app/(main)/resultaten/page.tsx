@@ -302,13 +302,16 @@ export default function ResultatenPage() {
   useEffect(() => {
     fetchKeywords()
 
-    const interval = setInterval(() => {
-      fetchKeywords()
-      const kw = selectedKeywordRef.current
-      if (kw) fetchLeads(kw)
-    }, 10_000)
+    const channel = supabase
+      .channel('leads-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'leads' }, () => {
+        fetchKeywords()
+        const kw = selectedKeywordRef.current
+        if (kw) fetchLeads(kw)
+      })
+      .subscribe()
 
-    return () => clearInterval(interval)
+    return () => { supabase.removeChannel(channel) }
   }, [fetchKeywords, fetchLeads])
 
   useEffect(() => {

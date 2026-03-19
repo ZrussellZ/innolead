@@ -37,8 +37,15 @@ export default function LeadStats() {
 
   useEffect(() => {
     fetchStats()
-    const interval = setInterval(fetchStats, 10_000)
-    return () => clearInterval(interval)
+
+    const channel = supabase
+      .channel('leads-stats-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'leads' }, () => {
+        fetchStats()
+      })
+      .subscribe()
+
+    return () => { supabase.removeChannel(channel) }
   }, [fetchStats])
 
   const items = [
