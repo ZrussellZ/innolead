@@ -52,9 +52,9 @@ export default function ProductTab({ data }: { data: ProductData }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <ProductCard title="Kleinste product" product={data.kleinste} icon="📦" />
-      <ProductCard title="Grootste product" product={data.grootste} icon="📐" />
+      <ProductCard title="Grootste product" product={data.grootste} icon="🧳" />
       <ProductCard title="Lichtste product" product={data.lichtste} icon="🪶" />
-      <ProductCard title="Zwaarste product" product={data.zwaarste} icon="⚖️" />
+      <ProductCard title="Zwaarste product" product={data.zwaarste} icon="🪨" />
     </div>
   )
 }

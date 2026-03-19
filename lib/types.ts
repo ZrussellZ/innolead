@@ -75,22 +75,33 @@ export interface Lead {
   'Contact 1 Last Name': string
   'Contact 1 Position': string
   'Contact 1 Linked-In': string
+  'Contact 1 Email URL': string
+  'Contact 1 Email': string
   'Contact 2 First Name': string
   'Contact 2 Last Name': string
   'Contact 2 Position': string
   'Contact 2 Linked-In': string
+  'Contact 2 Email URL': string
+  'Contact 2 Email': string
   'Contact 3 First Name': string
   'Contact 3 Last Name': string
   'Contact 3 Position': string
   'Contact 3 Linked-In': string
+  'Contact 3 Email URL': string
+  'Contact 3 Email': string
   'Contact 4 First Name': string
   'Contact 4 Last Name': string
   'Contact 4 Position': string
   'Contact 4 Linked-In': string
+  'Contact 4 Email URL': string
+  'Contact 4 Email': string
   'Contact 5 First Name': string
   'Contact 5 Last Name': string
   'Contact 5 Position': string
   'Contact 5 Linked-In': string
+  'Contact 5 Email URL': string
+  'Contact 5 Email': string
+  'Tag': string
   [key: string]: string
 }
 
@@ -176,6 +187,9 @@ export interface Contact {
   lastName: string
   position: string
   linkedIn: string
+  emailUrl: string
+  email: string
+  contactIndex: number
 }
 
 export interface ProspectData {
@@ -292,6 +306,9 @@ export function extractProspects(lead: Lead): ProspectData {
         lastName: lastName || '',
         position: lead[`Contact ${i} Position`] || '',
         linkedIn: lead[`Contact ${i} Linked-In`] || '',
+        emailUrl: lead[`Contact ${i} Email URL`] || '',
+        email: lead[`Contact ${i} Email`] || '',
+        contactIndex: i,
       })
     }
   }

@@ -11,7 +11,10 @@ interface KeywordGroup {
   latestDate: string
 }
 
+const ALL_KEYWORD = '__all__'
+
 const SUPABASE_TO_LEAD: Record<string, string> = {
+  tag: 'Tag',
   score_percentage: 'Score %',
   score_points: 'Gehaald punten',
   score_available: 'Mogelijke Punten',
@@ -81,22 +84,32 @@ const SUPABASE_TO_LEAD: Record<string, string> = {
   contact_1_last_name: 'Contact 1 Last Name',
   contact_1_position: 'Contact 1 Position',
   contact_1_linkedin: 'Contact 1 Linked-In',
+  contact_1_email_url: 'Contact 1 Email URL',
+  contact_1_email: 'Contact 1 Email',
   contact_2_first_name: 'Contact 2 First Name',
   contact_2_last_name: 'Contact 2 Last Name',
   contact_2_position: 'Contact 2 Position',
   contact_2_linkedin: 'Contact 2 Linked-In',
+  contact_2_email_url: 'Contact 2 Email URL',
+  contact_2_email: 'Contact 2 Email',
   contact_3_first_name: 'Contact 3 First Name',
   contact_3_last_name: 'Contact 3 Last Name',
   contact_3_position: 'Contact 3 Position',
   contact_3_linkedin: 'Contact 3 Linked-In',
+  contact_3_email_url: 'Contact 3 Email URL',
+  contact_3_email: 'Contact 3 Email',
   contact_4_first_name: 'Contact 4 First Name',
   contact_4_last_name: 'Contact 4 Last Name',
   contact_4_position: 'Contact 4 Position',
   contact_4_linkedin: 'Contact 4 Linked-In',
+  contact_4_email_url: 'Contact 4 Email URL',
+  contact_4_email: 'Contact 4 Email',
   contact_5_first_name: 'Contact 5 First Name',
   contact_5_last_name: 'Contact 5 Last Name',
   contact_5_position: 'Contact 5 Position',
   contact_5_linkedin: 'Contact 5 Linked-In',
+  contact_5_email_url: 'Contact 5 Email URL',
+  contact_5_email: 'Contact 5 Email',
 }
 
 function mapRow(row: Record<string, unknown>): Lead {
@@ -111,34 +124,114 @@ function mapRow(row: Record<string, unknown>): Lead {
   return lead
 }
 
-function leadToCsvRow(lead: Lead): string {
-  const fields = [
-    lead['Company name'],
-    lead['Website URL'],
-    lead['Score %'],
-    lead['Date'],
-    lead['Wat voor producten ze verkopen'],
-    lead['Aantal SKU\'s'],
-    lead['Google Rating'],
-    lead['Google Total Reviews'],
-    lead['TrustPilot Rating'],
-    lead['TrustPilot Total Reviews'],
-    lead['Has Meta Ads'],
-    lead['Google has ads'],
-    lead['Status'],
-  ]
-  return fields.map((f) => `"${(f || '').replace(/"/g, '""')}"`).join(',')
-}
+const ALL_EXPORT_FIELDS: { header: string; leadKey: string }[] = [
+  { header: 'Company name', leadKey: 'Company name' },
+  { header: 'Website URL', leadKey: 'Website URL' },
+  { header: 'Keyword', leadKey: 'keyword' },
+  { header: 'Score %', leadKey: 'Score %' },
+  { header: 'Gehaald punten', leadKey: 'Gehaald punten' },
+  { header: 'Mogelijke Punten', leadKey: 'Mogelijke Punten' },
+  { header: 'Uitleg score', leadKey: 'Uitleg score' },
+  { header: 'Date', leadKey: 'Date' },
+  { header: 'Tag', leadKey: 'Tag' },
+  { header: 'Wat voor producten ze verkopen', leadKey: 'Wat voor producten ze verkopen' },
+  { header: "Aantal SKU's", leadKey: "Aantal SKU's" },
+  { header: 'Kleinste product naam', leadKey: 'Kleinste product naam' },
+  { header: 'Kleinste product URL', leadKey: 'Kleinste product URL' },
+  { header: 'Kleinste product afmetingen', leadKey: 'Kleinste product afmetingen ' },
+  { header: 'Kleinste product gewicht', leadKey: 'Kleinste product gewicht' },
+  { header: 'Grootste product naam', leadKey: 'Grootste product naam' },
+  { header: 'Grootste product URL', leadKey: 'Grootste product URL' },
+  { header: 'Grootste product afmetingen', leadKey: 'Grootste product afemtingen' },
+  { header: 'Grootste product gewicht', leadKey: 'Grootste product gewicht' },
+  { header: 'Lichtste product naam', leadKey: 'Lichtste product naam' },
+  { header: 'Lichtste product URL', leadKey: 'Lichtste product URL' },
+  { header: 'Lichtste product afmetingen', leadKey: 'Lichtste product afemtingen' },
+  { header: 'Lichtste product gewicht', leadKey: 'Lichtste product gewicht' },
+  { header: 'Zwaarste product naam', leadKey: 'Zwaarste product naam' },
+  { header: 'Zwaarste product URL', leadKey: 'Zwaarste product URL' },
+  { header: 'Zwaarste product afmetingen', leadKey: 'Zwaarste product afmetingen' },
+  { header: 'Zwaarste product gewicht', leadKey: 'Zwaarste product gewicht' },
+  { header: 'Retour adress', leadKey: 'Retour adress' },
+  { header: 'Cutoff tijd', leadKey: 'Cutoff tijd' },
+  { header: 'Cutoff Note', leadKey: 'Cutoff Note' },
+  { header: 'Verzendlanden', leadKey: 'Waar ze hun producten naartoe sturen' },
+  { header: 'Instagram', leadKey: 'Instagram' },
+  { header: 'Facebook', leadKey: 'Facebook' },
+  { header: 'Youtube', leadKey: 'Youtube' },
+  { header: 'Tiktok', leadKey: 'Tiktok' },
+  { header: 'X', leadKey: 'X' },
+  { header: 'LinkedIn', leadKey: 'Linked In' },
+  { header: 'Status Product Info', leadKey: 'Status Product/Bedrijfs Informatie' },
+  { header: 'Google Rating', leadKey: 'Google Rating' },
+  { header: 'Google Total Reviews', leadKey: 'Google Total Reviews' },
+  { header: 'Recent Review 1', leadKey: 'Recent Review 1' },
+  { header: 'Recent Review 2', leadKey: 'Recent Review 2' },
+  { header: 'Recent Review 3', leadKey: 'Recent Review 3' },
+  { header: 'Google Business Adress', leadKey: 'Google Business Adress' },
+  { header: 'Google Place ID', leadKey: 'Google Place ID' },
+  { header: 'Status Google Reviews', leadKey: 'Status Google Reviews' },
+  { header: 'TrustPilot Rating', leadKey: 'TrustPilot Rating' },
+  { header: 'TrustPilot Total Reviews', leadKey: 'TrustPilot Total Reviews' },
+  { header: 'TrustPilot Recent Review 1', leadKey: 'TrustPilot Recent Review 1' },
+  { header: 'TrustPilot Recent Review 2', leadKey: 'TrustPilot Recent Review 2' },
+  { header: 'TrustPilot Recent Review 3', leadKey: 'TrustPilot Recent Review 3' },
+  { header: 'TrustPilot URL', leadKey: 'TrustPilot URL' },
+  { header: 'Status TrustPilot', leadKey: 'Status TrustPilot' },
+  { header: 'Has Meta Ads', leadKey: 'Has Meta Ads' },
+  { header: 'Meta active ads count', leadKey: 'Meta active ads count' },
+  { header: 'Meta Platforms', leadKey: 'Meta Platforms' },
+  { header: 'Meta Last ad run', leadKey: 'Meta Last ad run' },
+  { header: 'Meta Ads last 30 days', leadKey: 'Meta Ads runned last 30 days?' },
+  { header: 'Meta Likes count', leadKey: 'Meta Likes count' },
+  { header: 'Meta Library URL', leadKey: 'Meta Libary URL' },
+  { header: 'Meta Page ID', leadKey: 'Meta Page ID' },
+  { header: 'Google has ads', leadKey: 'Google has ads' },
+  { header: 'Google Page ID', leadKey: 'Google Page ID' },
+  { header: 'Google Latest ad', leadKey: 'Google Latest ad' },
+  { header: 'Google Ads last 30 days', leadKey: 'Ads runned last 30 days?' },
+  { header: 'Status', leadKey: 'Status' },
+  { header: 'Contact 1 First Name', leadKey: 'Contact 1 First Name' },
+  { header: 'Contact 1 Last Name', leadKey: 'Contact 1 Last Name' },
+  { header: 'Contact 1 Position', leadKey: 'Contact 1 Position' },
+  { header: 'Contact 1 LinkedIn', leadKey: 'Contact 1 Linked-In' },
+  { header: 'Contact 1 Email URL', leadKey: 'Contact 1 Email URL' },
+  { header: 'Contact 1 Email', leadKey: 'Contact 1 Email' },
+  { header: 'Contact 2 First Name', leadKey: 'Contact 2 First Name' },
+  { header: 'Contact 2 Last Name', leadKey: 'Contact 2 Last Name' },
+  { header: 'Contact 2 Position', leadKey: 'Contact 2 Position' },
+  { header: 'Contact 2 LinkedIn', leadKey: 'Contact 2 Linked-In' },
+  { header: 'Contact 2 Email URL', leadKey: 'Contact 2 Email URL' },
+  { header: 'Contact 2 Email', leadKey: 'Contact 2 Email' },
+  { header: 'Contact 3 First Name', leadKey: 'Contact 3 First Name' },
+  { header: 'Contact 3 Last Name', leadKey: 'Contact 3 Last Name' },
+  { header: 'Contact 3 Position', leadKey: 'Contact 3 Position' },
+  { header: 'Contact 3 LinkedIn', leadKey: 'Contact 3 Linked-In' },
+  { header: 'Contact 3 Email URL', leadKey: 'Contact 3 Email URL' },
+  { header: 'Contact 3 Email', leadKey: 'Contact 3 Email' },
+  { header: 'Contact 4 First Name', leadKey: 'Contact 4 First Name' },
+  { header: 'Contact 4 Last Name', leadKey: 'Contact 4 Last Name' },
+  { header: 'Contact 4 Position', leadKey: 'Contact 4 Position' },
+  { header: 'Contact 4 LinkedIn', leadKey: 'Contact 4 Linked-In' },
+  { header: 'Contact 4 Email URL', leadKey: 'Contact 4 Email URL' },
+  { header: 'Contact 4 Email', leadKey: 'Contact 4 Email' },
+  { header: 'Contact 5 First Name', leadKey: 'Contact 5 First Name' },
+  { header: 'Contact 5 Last Name', leadKey: 'Contact 5 Last Name' },
+  { header: 'Contact 5 Position', leadKey: 'Contact 5 Position' },
+  { header: 'Contact 5 LinkedIn', leadKey: 'Contact 5 Linked-In' },
+  { header: 'Contact 5 Email URL', leadKey: 'Contact 5 Email URL' },
+  { header: 'Contact 5 Email', leadKey: 'Contact 5 Email' },
+]
 
-const CSV_HEADER = [
-  'Company name', 'Website URL', 'Score %', 'Date',
-  'Products', 'SKUs', 'Google Rating', 'Google Reviews',
-  'TrustPilot Rating', 'TrustPilot Reviews',
-  'Has Meta Ads', 'Has Google Ads', 'Status',
-].map((h) => `"${h}"`).join(',')
+const CSV_HEADER = ALL_EXPORT_FIELDS.map((f) => `"${f.header}"`).join(',')
+
+function leadToCsvRow(lead: Lead): string {
+  return ALL_EXPORT_FIELDS.map((f) => `"${(lead[f.leadKey] || '').replace(/"/g, '""')}"`).join(',')
+}
 
 export default function ResultatenPage() {
   const [keywordGroups, setKeywordGroups] = useState<KeywordGroup[]>([])
+  const [totalLeadCount, setTotalLeadCount] = useState(0)
   const [selectedKeyword, setSelectedKeyword] = useState<string | null>(null)
   const [leads, setLeads] = useState<Lead[]>([])
   const [selectedCompanyIndex, setSelectedCompanyIndex] = useState<number | null>(null)
@@ -150,9 +243,12 @@ export default function ResultatenPage() {
     const { data, error } = await supabase.from('leads').select('keyword, created_at')
     if (error || !data) {
       setKeywordGroups([])
+      setTotalLeadCount(0)
       setLoading(false)
       return
     }
+
+    setTotalLeadCount(data.length)
 
     const map = new Map<string, KeywordGroup>()
     for (const row of data) {
@@ -174,7 +270,7 @@ export default function ResultatenPage() {
     setKeywordGroups(groups)
 
     setSelectedKeyword((prev) => {
-      if (prev && groups.some((g) => g.keyword === prev)) return prev
+      if (prev && (prev === ALL_KEYWORD || groups.some((g) => g.keyword === prev))) return prev
       return groups.length > 0 ? groups[0].keyword : null
     })
     setLoading(false)
@@ -184,7 +280,13 @@ export default function ResultatenPage() {
     setLoadingLeads(true)
     setSelectedCompanyIndex(null)
     setSelectedForExport(new Set())
-    const { data } = await supabase.from('leads').select('*').eq('keyword', kw)
+
+    let query = supabase.from('leads').select('*')
+    if (kw !== ALL_KEYWORD) {
+      query = query.eq('keyword', kw)
+    }
+
+    const { data } = await query
     setLeads((data || []).map((row) => mapRow(row as Record<string, unknown>)))
     setLoadingLeads(false)
   }, [])
@@ -200,11 +302,8 @@ export default function ResultatenPage() {
   function handleToggleSelect(originalIndex: number) {
     setSelectedForExport((prev) => {
       const next = new Set(prev)
-      if (next.has(originalIndex)) {
-        next.delete(originalIndex)
-      } else {
-        next.add(originalIndex)
-      }
+      if (next.has(originalIndex)) next.delete(originalIndex)
+      else next.add(originalIndex)
       return next
     })
   }
@@ -224,32 +323,64 @@ export default function ResultatenPage() {
     })
   }
 
-  function handleExportSelected() {
+  async function handleTagChange(index: number, tag: string) {
+    const lead = leads[index]
+    if (!lead) return
+
+    const updated = [...leads]
+    updated[index] = { ...lead, Tag: tag }
+    setLeads(updated)
+
+    const id = lead['id']
+    if (id) {
+      await supabase.from('leads').update({ tag: tag || null }).eq('id', id)
+    }
+  }
+
+  async function handleBulkTag(tag: string) {
     if (selectedForExport.size === 0) return
-    const rows = Array.from(selectedForExport)
-      .sort((a, b) => a - b)
-      .map((i) => leadToCsvRow(leads[i]))
-    const csv = [CSV_HEADER, ...rows].join('\n')
+    const indices = Array.from(selectedForExport)
+    const updated = [...leads]
+    const ids: string[] = []
+
+    for (const i of indices) {
+      if (!updated[i]) continue
+      updated[i] = { ...updated[i], Tag: tag }
+      const id = updated[i]['id']
+      if (id) ids.push(id)
+    }
+    setLeads(updated)
+
+    if (ids.length > 0) {
+      await supabase.from('leads').update({ tag: tag || null }).in('id', ids)
+    }
+  }
+
+  function downloadCsv(rows: Lead[], filename: string) {
+    const csvRows = rows.map((l) => leadToCsvRow(l))
+    const csv = '\uFEFF' + [CSV_HEADER, ...csvRows].join('\n')
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `leads-${selectedKeyword || 'export'}-${new Date().toISOString().slice(0, 10)}.csv`
+    a.download = filename
     a.click()
     URL.revokeObjectURL(url)
   }
 
+  function handleExportSelected() {
+    if (selectedForExport.size === 0) return
+    const rows = Array.from(selectedForExport)
+      .sort((a, b) => a - b)
+      .map((i) => leads[i])
+    const label = selectedKeyword === ALL_KEYWORD ? 'alle' : selectedKeyword || 'export'
+    downloadCsv(rows, `leads-${label}-${new Date().toISOString().slice(0, 10)}.csv`)
+  }
+
   function handleDownloadAll() {
     if (leads.length === 0) return
-    const rows = leads.map((l) => leadToCsvRow(l))
-    const csv = [CSV_HEADER, ...rows].join('\n')
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `leads-${selectedKeyword || 'export'}-${new Date().toISOString().slice(0, 10)}.csv`
-    a.click()
-    URL.revokeObjectURL(url)
+    const label = selectedKeyword === ALL_KEYWORD ? 'alle' : selectedKeyword || 'export'
+    downloadCsv(leads, `leads-${label}-${new Date().toISOString().slice(0, 10)}.csv`)
   }
 
   if (loading) {
@@ -322,6 +453,9 @@ export default function ResultatenPage() {
           onChange={(e) => setSelectedKeyword(e.target.value)}
           className="input-field py-2 pr-8 w-full"
         >
+          <option value={ALL_KEYWORD}>
+            Alle resultaten ({totalLeadCount})
+          </option>
           {keywordGroups.map((g) => (
             <option key={g.keyword} value={g.keyword}>
               {g.keyword} - {new Date(g.latestDate).toLocaleDateString('nl-NL')} ({g.count})
@@ -347,6 +481,7 @@ export default function ResultatenPage() {
             selectedForExport={selectedForExport}
             onToggleSelect={handleToggleSelect}
             onToggleSelectAll={handleToggleSelectAll}
+            onTagChange={handleTagChange}
           />
         </div>
       )}
@@ -364,7 +499,26 @@ export default function ResultatenPage() {
                   {selectedForExport.size === 1 ? 'bedrijf' : 'bedrijven'} geselecteerd
                 </span>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap justify-end">
+                <div className="flex items-center gap-1">
+                  <span className="text-xs text-white/70 mr-1">Tag:</span>
+                  {['Cas', 'Cuno', 'Philip'].map((tag) => (
+                    <button
+                      key={tag}
+                      onClick={() => handleBulkTag(tag)}
+                      className="px-2.5 py-1 text-xs font-medium rounded-lg bg-white/15 hover:bg-white/25 transition-colors"
+                    >
+                      {tag}
+                    </button>
+                  ))}
+                  <button
+                    onClick={() => handleBulkTag('')}
+                    className="px-2.5 py-1 text-xs font-medium rounded-lg bg-white/10 hover:bg-white/20 transition-colors text-white/70 hover:text-white"
+                  >
+                    Verwijder
+                  </button>
+                </div>
+                <div className="w-px h-5 bg-white/25 hidden sm:block" />
                 <button
                   onClick={() => setSelectedForExport(new Set())}
                   className="px-3 py-1.5 text-sm font-medium rounded-lg bg-white/15 hover:bg-white/25 transition-colors"

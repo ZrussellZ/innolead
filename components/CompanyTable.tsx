@@ -1,11 +1,96 @@
 'use client'
 
-import { Fragment, useState, useMemo } from 'react'
+import { Fragment, useState, useMemo, useRef, useEffect } from 'react'
 import type { Lead } from '@/lib/types'
 import CompanyDetail from './CompanyDetail'
 
 type SortField = 'Company name' | 'Score %' | 'Website URL' | 'Date'
 type SortDirection = 'asc' | 'desc'
+
+const TAG_OPTIONS = ['Cas', 'Cuno', 'Philip'] as const
+type TagValue = (typeof TAG_OPTIONS)[number]
+
+const TAG_COLORS: Record<string, { bg: string; text: string; border: string }> = {
+  Cas: { bg: 'bg-blue-100', text: 'text-blue-700', border: 'border-blue-200' },
+  Cuno: { bg: 'bg-emerald-100', text: 'text-emerald-700', border: 'border-emerald-200' },
+  Philip: { bg: 'bg-purple-100', text: 'text-purple-700', border: 'border-purple-200' },
+}
+
+function TagBadge({ tag }: { tag: string }) {
+  const colors = TAG_COLORS[tag]
+  if (!colors) return null
+  return (
+    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${colors.bg} ${colors.text}`}>
+      {tag}
+    </span>
+  )
+}
+
+function TagDropdown({
+  currentTag,
+  onSelect,
+}: {
+  currentTag: string
+  onSelect: (tag: string) => void
+}) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+    }
+    if (open) document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [open])
+
+  return (
+    <div ref={ref} className="relative inline-block" onClick={(e) => e.stopPropagation()}>
+      <button
+        onClick={() => setOpen(!open)}
+        className="p-1 rounded hover:bg-surface-alt transition-colors text-text-muted hover:text-text"
+        title="Tag toewijzen"
+      >
+        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9.568 3H5.25A2.25 2.25 0 0 0 3 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 0 0 5.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 0 0 9.568 3Z" />
+          <path strokeLinecap="round" strokeLinejoin="round" d="M6 6h.008v.008H6V6Z" />
+        </svg>
+      </button>
+      {open && (
+        <div className="absolute right-0 top-full mt-1 bg-white border border-surface-border rounded-lg shadow-lg z-50 py-1 min-w-[120px]">
+          {TAG_OPTIONS.map((tag) => (
+            <button
+              key={tag}
+              onClick={() => { onSelect(tag); setOpen(false) }}
+              className={`w-full text-left px-3 py-1.5 text-sm hover:bg-surface-alt transition-colors flex items-center gap-2 ${
+                currentTag === tag ? 'font-semibold' : ''
+              }`}
+            >
+              <span className={`w-2 h-2 rounded-full ${TAG_COLORS[tag].bg} ${TAG_COLORS[tag].border} border`} />
+              {tag}
+              {currentTag === tag && (
+                <svg className="w-3.5 h-3.5 ml-auto text-brand" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                </svg>
+              )}
+            </button>
+          ))}
+          {currentTag && (
+            <>
+              <div className="border-t border-surface-border my-1" />
+              <button
+                onClick={() => { onSelect(''); setOpen(false) }}
+                className="w-full text-left px-3 py-1.5 text-sm text-text-muted hover:bg-surface-alt transition-colors"
+              >
+                Verwijder tag
+              </button>
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
 
 function ScoreBadge({ score }: { score: string }) {
   const numScore = parseInt(score) || 0
@@ -40,6 +125,7 @@ export default function CompanyTable({
   selectedForExport,
   onToggleSelect,
   onToggleSelectAll,
+  onTagChange,
 }: {
   leads: Lead[]
   onSelectCompany: (index: number | null) => void
@@ -47,20 +133,31 @@ export default function CompanyTable({
   selectedForExport: Set<number>
   onToggleSelect: (index: number) => void
   onToggleSelectAll: (visibleIndices: number[]) => void
+  onTagChange: (index: number, tag: string) => void
 }) {
   const [sortField, setSortField] = useState<SortField>('Score %')
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
   const [searchQuery, setSearchQuery] = useState('')
+  const [tagFilter, setTagFilter] = useState<string | null>(null)
 
   const filteredAndSorted = useMemo(() => {
     let result = leads.map((lead, originalIndex) => ({ lead, originalIndex }))
+
+    if (tagFilter !== null) {
+      if (tagFilter === '') {
+        result = result.filter(({ lead }) => !lead['Tag'])
+      } else {
+        result = result.filter(({ lead }) => lead['Tag'] === tagFilter)
+      }
+    }
 
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase()
       result = result.filter(
         ({ lead }) =>
           lead['Company name']?.toLowerCase().includes(q) ||
-          lead['Website URL']?.toLowerCase().includes(q)
+          lead['Website URL']?.toLowerCase().includes(q) ||
+          lead['Tag']?.toLowerCase().includes(q)
       )
     }
 
@@ -82,7 +179,7 @@ export default function CompanyTable({
     })
 
     return result
-  }, [leads, searchQuery, sortField, sortDirection])
+  }, [leads, searchQuery, sortField, sortDirection, tagFilter])
 
   const visibleIndices = useMemo(
     () => filteredAndSorted.map(({ originalIndex }) => originalIndex),
@@ -114,32 +211,55 @@ export default function CompanyTable({
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Zoek op bedrijfsnaam of URL..."
+          placeholder="Zoek op bedrijfsnaam, URL of tag..."
           className="input-field pl-10"
         />
       </div>
 
-      {/* Mobile sort controls */}
-      <div className="flex items-center gap-2 md:hidden">
-        <span className="text-xs text-text-secondary">Sorteer:</span>
-        {([
-          { field: 'Company name' as SortField, label: 'Naam' },
-          { field: 'Score %' as SortField, label: 'Score' },
-          { field: 'Date' as SortField, label: 'Datum' },
-        ]).map(({ field, label }) => (
-          <button
-            key={field}
-            onClick={() => handleSort(field)}
-            className={`px-2.5 py-1 text-xs rounded-full border transition-colors ${
-              sortField === field
-                ? 'bg-brand text-white border-brand'
-                : 'border-surface-border text-text-secondary hover:border-brand'
-            }`}
-          >
-            {label}
-            {sortField === field && (sortDirection === 'asc' ? ' ↑' : ' ↓')}
-          </button>
-        ))}
+      {/* Filter controls */}
+      <div className="space-y-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-xs text-text-secondary">Tag:</span>
+          {[
+            { value: null, label: 'Alle' },
+            ...TAG_OPTIONS.map((t) => ({ value: t, label: t })),
+            { value: '', label: 'Geen tag' },
+          ].map(({ value, label }) => (
+            <button
+              key={label}
+              onClick={() => setTagFilter(tagFilter === value ? null : value)}
+              className={`px-2.5 py-1 text-xs rounded-full border transition-colors ${
+                tagFilter === value
+                  ? 'bg-brand text-white border-brand'
+                  : 'border-surface-border text-text-secondary hover:border-brand'
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2 md:hidden">
+          <span className="text-xs text-text-secondary">Sorteer:</span>
+          {([
+            { field: 'Company name' as SortField, label: 'Naam' },
+            { field: 'Score %' as SortField, label: 'Score' },
+            { field: 'Date' as SortField, label: 'Datum' },
+          ]).map(({ field, label }) => (
+            <button
+              key={field}
+              onClick={() => handleSort(field)}
+              className={`px-2.5 py-1 text-xs rounded-full border transition-colors ${
+                sortField === field
+                  ? 'bg-brand text-white border-brand'
+                  : 'border-surface-border text-text-secondary hover:border-brand'
+              }`}
+            >
+              {label}
+              {sortField === field && (sortDirection === 'asc' ? ' ↑' : ' ↓')}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Mobile card list */}
@@ -188,10 +308,21 @@ export default function CompanyTable({
                       </p>
                     </div>
                     <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                      <ScoreBadge score={lead['Score %']} />
-                      <span className="text-xs text-text-muted">
-                        {lead['Date']?.split(' ')[0] || '-'}
-                      </span>
+                      <div className="flex items-center gap-1.5">
+                        <ScoreBadge score={lead['Score %']} />
+                        <div onClick={(e) => e.stopPropagation()}>
+                          <TagDropdown
+                            currentTag={lead['Tag'] || ''}
+                            onSelect={(tag) => onTagChange(originalIndex, tag)}
+                          />
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        {lead['Tag'] && <TagBadge tag={lead['Tag']} />}
+                        <span className="text-xs text-text-muted">
+                          {lead['Date']?.split(' ')[0] || '-'}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -246,6 +377,9 @@ export default function CompanyTable({
                   </div>
                 </th>
               ))}
+              <th className="text-left px-4 py-3 text-sm font-semibold text-text-secondary select-none">
+                Tag
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -299,11 +433,20 @@ export default function CompanyTable({
                         {lead['Date']?.split(' ')[0] || '-'}
                       </span>
                     </td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+                        {lead['Tag'] && <TagBadge tag={lead['Tag']} />}
+                        <TagDropdown
+                          currentTag={lead['Tag'] || ''}
+                          onSelect={(tag) => onTagChange(originalIndex, tag)}
+                        />
+                      </div>
+                    </td>
                   </tr>
 
                   {isSelected && (
                     <tr className="border-t border-brand">
-                      <td colSpan={5} className="p-0 bg-white">
+                      <td colSpan={6} className="p-0 bg-white">
                         <div className="p-4">
                           <CompanyDetail
                             lead={lead}
@@ -318,7 +461,7 @@ export default function CompanyTable({
             })}
             {filteredAndSorted.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-4 py-12 text-center text-text-secondary">
+                <td colSpan={6} className="px-4 py-12 text-center text-text-secondary">
                   Geen resultaten gevonden
                 </td>
               </tr>

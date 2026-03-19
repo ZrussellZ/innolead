@@ -39,7 +39,14 @@ export default function CompanyDetail({
       case 'advertenties':
         return <AdvertentiesTab data={extractAds(lead)} />
       case 'prospect':
-        return <ProspectTab data={extractProspects(lead)} />
+        return (
+          <ProspectTab
+            data={extractProspects(lead)}
+            companyName={lead['Company name']}
+            companyUrl={lead['Website URL']}
+            leadId={lead['id']}
+          />
+        )
     }
   }
 
