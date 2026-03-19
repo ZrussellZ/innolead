@@ -509,50 +509,62 @@ export default function ResultatenPage() {
       {selectedForExport.size > 0 && (
         <div className="fixed bottom-0 inset-x-0 z-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-4">
-            <div className="bg-brand text-white rounded-xl shadow-lg px-5 py-3.5 flex items-center justify-between gap-4">
+            <div className="bg-brand text-white rounded-xl shadow-lg px-4 py-4 sm:px-5 sm:py-3.5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+              {/* Count & label */}
               <div className="flex items-center gap-3">
-                <span className="bg-white/20 text-white text-sm font-bold rounded-full w-8 h-8 flex items-center justify-center">
+                <span className="bg-white/20 text-white text-sm font-bold rounded-full w-8 h-8 flex items-center justify-center shrink-0">
                   {selectedForExport.size}
                 </span>
                 <span className="text-sm font-medium">
                   {selectedForExport.size === 1 ? 'bedrijf' : 'bedrijven'} geselecteerd
                 </span>
               </div>
-              <div className="flex items-center gap-2 flex-wrap justify-end">
-                <div className="flex items-center gap-1">
-                  <span className="text-xs text-white/70 mr-1">Tag:</span>
-                  {['Cas', 'Cuno', 'Philip'].map((tag) => (
+
+              {/* Actions: stacked on mobile, row on desktop */}
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-3">
+                {/* Tag section */}
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                  <span className="text-xs text-white/70 font-medium">Tag:</span>
+                  <div className="flex flex-wrap gap-2">
+                    {['Cas', 'Cuno', 'Philip'].map((tag) => (
+                      <button
+                        key={tag}
+                        onClick={() => handleBulkTag(tag)}
+                        className="px-3 py-1.5 text-xs font-medium rounded-lg bg-white/15 hover:bg-white/25 transition-colors"
+                      >
+                        {tag}
+                      </button>
+                    ))}
                     <button
-                      key={tag}
-                      onClick={() => handleBulkTag(tag)}
-                      className="px-2.5 py-1 text-xs font-medium rounded-lg bg-white/15 hover:bg-white/25 transition-colors"
+                      onClick={() => handleBulkTag('')}
+                      className="px-3 py-1.5 text-xs font-medium rounded-lg bg-white/10 hover:bg-white/20 transition-colors text-white/70 hover:text-white"
                     >
-                      {tag}
+                      Verwijder
                     </button>
-                  ))}
+                  </div>
+                </div>
+
+                {/* Divider on desktop */}
+                <div className="hidden sm:block w-px h-6 bg-white/25" />
+
+                {/* Deselect & Export */}
+                <div className="flex gap-2 sm:gap-2">
                   <button
-                    onClick={() => handleBulkTag('')}
-                    className="px-2.5 py-1 text-xs font-medium rounded-lg bg-white/10 hover:bg-white/20 transition-colors text-white/70 hover:text-white"
+                    onClick={() => setSelectedForExport(new Set())}
+                    className="flex-1 sm:flex-none px-4 py-2.5 text-sm font-medium rounded-lg bg-white/15 hover:bg-white/25 transition-colors"
                   >
-                    Verwijder
+                    Deselecteer
+                  </button>
+                  <button
+                    onClick={handleExportSelected}
+                    className="flex-1 sm:flex-none px-4 py-2.5 text-sm font-semibold rounded-lg bg-white text-brand hover:bg-white/90 transition-colors flex items-center justify-center gap-2"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 shrink-0">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                    </svg>
+                    Exporteer CSV
                   </button>
                 </div>
-                <div className="w-px h-5 bg-white/25 hidden sm:block" />
-                <button
-                  onClick={() => setSelectedForExport(new Set())}
-                  className="px-3 py-1.5 text-sm font-medium rounded-lg bg-white/15 hover:bg-white/25 transition-colors"
-                >
-                  Deselecteer
-                </button>
-                <button
-                  onClick={handleExportSelected}
-                  className="px-4 py-1.5 text-sm font-semibold rounded-lg bg-white text-brand hover:bg-white/90 transition-colors flex items-center gap-2"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
-                  </svg>
-                  Exporteer CSV
-                </button>
               </div>
             </div>
           </div>
